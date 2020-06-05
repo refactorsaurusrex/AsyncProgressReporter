@@ -1,0 +1,17 @@
+version: '{build}'
+image: Visual Studio 2019
+build_script:
+- pwsh: dotnet build .\src\AsyncProgressReporter\AsyncProgressReporter.csproj -c Release -p:Version="1.0.$env:APPVEYOR_BUILD_VERSION"
+artifacts:
+- path: '**\*.nupkg'
+  name: AsyncProgressReporter
+deploy:
+- provider: NuGet
+  api_key:
+    secure: qZWShY9ASo065IwPFYQwk/8EqjlAFzTNhQxPMQ9r7b9UueQq+d1JnZMeiS/KI6bZ
+  on:
+    branch: master
+skip_commits:
+  files:
+    - '**/*.md'
+    - images/*

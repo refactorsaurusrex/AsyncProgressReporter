@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Nick Spreitzer</Authors>
+    <Copyright>Copyright 2020 Nick Spreitzer</Copyright>
+    <PackageProjectUrl>https://github.com/refactorsaurusrex/AsyncProgressReporter</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/refactorsaurusrex/AsyncProgressReporter</RepositoryUrl>
+    <PackageTags>powershell,cmdlet,progress-bar,async</PackageTags>
+    <Description>Asynchronously pipe progress messages from long running functions to PowerShell cmdlets.</Description>
+    <PackageIcon>satellite.png</PackageIcon>
+    <PackageIconUrl />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>C:\Repos\AsyncProgressReporter\src\AsyncProgressReporter\AsyncProgressReporter.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="AsyncProgressReporter.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PowerShellStandard.Library" Version="5.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\images\satellite.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
