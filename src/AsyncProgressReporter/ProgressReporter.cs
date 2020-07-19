@@ -10,12 +10,12 @@ namespace AsyncProgressReporter
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
         /// <inheritdoc />
-        public async Task UpdateProgress(string currentOperation, int totalItems, int completedItems, string verboseOutput = "")
+        public async Task UpdateProgress(string currentOperation, int completedItems, int totalItems, string verboseOutput = "")
         {
             await _semaphore.WaitAsync();
             try
             {
-                await Task.Run(() => Add(new ProgressInfo(currentOperation, totalItems, completedItems, verboseOutput)));
+                await Task.Run(() => Add(new ProgressInfo(currentOperation, completedItems, totalItems, verboseOutput)));
             }
             finally
             {

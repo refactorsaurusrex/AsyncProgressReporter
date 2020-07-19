@@ -11,11 +11,11 @@ namespace AsyncProgressReporter
         /// Create a new progress update message.
         /// </summary>
         /// <param name="currentOperation">The current operation of the many required to accomplish the activity (such as "copying foo.txt").
-        /// Normally displayed below its associated progress bar, e.g., "deleting file foo.bar"</param>
-        /// <param name="totalItems">The total number of items to be processed.</param>
+        ///     Normally displayed below its associated progress bar, e.g., "deleting file foo.bar"</param>
         /// <param name="completedItems">The number of items that have already been processed.</param>
+        /// <param name="totalItems">The total number of items to be processed.</param>
         /// <param name="verboseOutput">Additional output that should be displayed when the -Verbose parameter is provided.</param>
-        public ProgressInfo(string currentOperation, int totalItems, int completedItems, string verboseOutput = "")
+        public ProgressInfo(string currentOperation, int completedItems, int totalItems, string verboseOutput = "")
         {
             CurrentOperation = currentOperation;
             TotalItems = totalItems;
