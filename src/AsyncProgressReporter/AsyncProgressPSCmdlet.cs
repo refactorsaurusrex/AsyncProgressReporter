@@ -8,7 +8,6 @@ namespace AsyncProgressReporter
     /// </summary>
     public class AsyncProgressPSCmdlet : PSCmdlet
     {
-        private ProgressRecord _blockingProgressRecord;
         private ProgressRecord _progressRecord;
 
         /// <summary>
@@ -21,23 +20,26 @@ namespace AsyncProgressReporter
         /// <param name="activityId">The ID for the blocking progress record. The default is 0. Only override as necessary. Useful if 0 is already in use.</param>
         /// <param name="parentActivityId">The ID for a parent progress record. This is only necessary if you are manually creating your own parent progress records.
         /// See AsyncProgressBarWithChild2 class in demo project for an example of this.</param>
-        protected void ShowBlockingProgress(ProgressReporter reporter, string activity, string initialDescription = "Getting started...", int activityId = 0, int? parentActivityId = null)
+        protected void ShowProgressWait(ProgressReporter reporter, string activity, string initialDescription = "Getting started...", int activityId = 0, int? parentActivityId = null)
         {
-            _blockingProgressRecord = new ProgressRecord(activityId, activity, initialDescription);
+            var blockingProgressRecord = new ProgressRecord(activityId, activity, initialDescription);
 
             if (parentActivityId.HasValue)
-                _blockingProgressRecord.ParentActivityId = parentActivityId.Value;
+                blockingProgressRecord.ParentActivityId = parentActivityId.Value;
             else if (_progressRecord != null)
-                _blockingProgressRecord.ParentActivityId = _progressRecord.ActivityId;
+                blockingProgressRecord.ParentActivityId = _progressRecord.ActivityId;
 
             foreach (var progressInfo in reporter.GetConsumingEnumerable())
             {
-                Map(progressInfo, _blockingProgressRecord);
-                WriteProgress(_blockingProgressRecord);
+                Map(progressInfo, blockingProgressRecord);
+                WriteProgress(blockingProgressRecord);
 
                 if (!string.IsNullOrEmpty(progressInfo.VerboseOutput))
                     WriteVerbose(progressInfo.VerboseOutput);
             }
+
+            blockingProgressRecord.RecordType = ProgressRecordType.Completed;
+            WriteProgress(blockingProgressRecord);
         }
 
         /// <summary>
@@ -73,19 +75,6 @@ namespace AsyncProgressReporter
                 _progressRecord.RecordType = ProgressRecordType.Completed;
                 WriteProgress(_progressRecord);
                 _progressRecord = null;
-            }
-        }
-
-        /// <summary>
-        /// Marks the current blocking progress bar as 'completed', which hides it from view.
-        /// </summary>
-        protected void HideBlockingProgress()
-        {
-            if (_blockingProgressRecord != null)
-            {
-                _blockingProgressRecord.RecordType = ProgressRecordType.Completed;
-                WriteProgress(_blockingProgressRecord);
-                _blockingProgressRecord = null;
             }
         }
 

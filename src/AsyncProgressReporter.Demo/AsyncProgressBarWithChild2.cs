@@ -5,6 +5,9 @@ namespace AsyncProgressReporter.Demo
     [Cmdlet(VerbsLifecycle.Start, "AsyncProgressBarWithChild2")]
     public class AsyncProgressBarWithChild2 : AsyncProgressPSCmdlet
     {
+        [Parameter]
+        public SwitchParameter ThrowException { get; set; }
+
         protected override void ProcessRecord()
         {
             // Create your own ProgressRecord
@@ -22,14 +25,11 @@ namespace AsyncProgressReporter.Demo
                 var fizzBuzz = new SlowFizzBuzz();
 
                 // Start long running task...
-                var task = fizzBuzz.Go(reporter);
+                var task = fizzBuzz.Go(reporter, ThrowException);
 
                 // Show progress bar and wait until task has completed. Pass in ActivityId of parent.
-                ShowBlockingProgress(reporter, "I can haz fizzbuzz?", parentActivityId: progressRecord.ActivityId);
+                ShowProgressWait(reporter, "I can haz fizzbuzz?", parentActivityId: progressRecord.ActivityId);
                 task.Wait();
-
-                // Dismiss progress bar
-                HideBlockingProgress();
             }
 
             HideProgress();

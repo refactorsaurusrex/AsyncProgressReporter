@@ -1,11 +1,13 @@
-﻿using System;
-using System.Management.Automation;
+﻿using System.Management.Automation;
 
 namespace AsyncProgressReporter.Demo
 {
     [Cmdlet(VerbsLifecycle.Start, "AsyncProgressBarWithChild")]
     public class AsyncProgressBarWithChild : AsyncProgressPSCmdlet
     {
+        [Parameter]
+        public SwitchParameter ThrowException { get; set; }
+
         protected override void ProcessRecord()
         {
             ShowProgress("Running FizzBuzz 3 times");
@@ -18,17 +20,14 @@ namespace AsyncProgressReporter.Demo
                 var fizzBuzz = new SlowFizzBuzz();
 
                 // Start long running task...
-                var task = fizzBuzz.Go(reporter);
+                var task = fizzBuzz.Go(reporter, ThrowException);
 
                 // Show progress bar and wait until task has completed...
-                ShowBlockingProgress(reporter, "I can haz fizzbuzz?");
+                ShowProgressWait(reporter, "I can haz fizzbuzz?");
                 task.Wait();
-
-                // Dismiss progress bar
-                HideBlockingProgress();
             }
 
             HideProgress();
         }
     }
-}
+}   
