@@ -1,4 +1,5 @@
-﻿using System.Management.Automation;
+﻿using System;
+using System.Management.Automation;
 
 namespace AsyncProgressReporter.Demo
 {
@@ -10,11 +11,13 @@ namespace AsyncProgressReporter.Demo
 
         protected override void ProcessRecord()
         {
+            string StatusDescription(ProgressInfo info) => $"Currently processing item {info.CompletedItems} of {info.TotalItems}";
+
             ShowProgress("Running FizzBuzz 3 times");
 
             for (var i = 1; i <= 3; i++)
             {
-                UpdateProgress(new ProgressInfo($"Run #{i}", i, 3));
+                UpdateProgress(new ProgressInfo($"Run #{i}", i, 3), StatusDescription);
 
                 var reporter = new ProgressReporter();
                 var fizzBuzz = new SlowFizzBuzz();

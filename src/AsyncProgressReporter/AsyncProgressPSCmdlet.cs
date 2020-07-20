@@ -20,7 +20,8 @@ namespace AsyncProgressReporter
         /// <param name="activityId">The ID for the blocking progress record. The default is 0. Only override as necessary. Useful if 0 is already in use.</param>
         /// <param name="parentActivityId">The ID for a parent progress record. This is only necessary if you are manually creating your own parent progress records.
         /// See AsyncProgressBarWithChild2 class in demo project for an example of this.</param>
-        protected void ShowProgressWait(ProgressReporter reporter, string activity, string initialDescription = "Getting started...", int activityId = 0, int? parentActivityId = null)
+        /// <param name="statusDescriptionMap">An optional status description mapper. Use it to override the default StatusDescription formatting.</param>
+        protected void ShowProgressWait(ProgressReporter reporter, string activity, string initialDescription = "Getting started...", int activityId = 0, int? parentActivityId = null, Func<ProgressInfo, string> statusDescriptionMap = null)
         {
             var blockingProgressRecord = new ProgressRecord(activityId, activity, initialDescription);
 
@@ -31,7 +32,8 @@ namespace AsyncProgressReporter
 
             foreach (var progressInfo in reporter.GetConsumingEnumerable())
             {
-                Map(progressInfo, blockingProgressRecord);
+                var statusDescriptionText = statusDescriptionMap?.Invoke(progressInfo);
+                Map(progressInfo, blockingProgressRecord, statusDescriptionText);
                 WriteProgress(blockingProgressRecord);
 
                 if (!string.IsNullOrEmpty(progressInfo.VerboseOutput))
@@ -58,10 +60,12 @@ namespace AsyncProgressReporter
         /// Maps the specified ProgressInfo to a ProgressRecord using the Action provided by the Map property, then writes the resulting record to the non-blocking
         /// progress record.
         /// </summary>
-        /// <param name="progress"></param>
-        protected virtual void UpdateProgress(ProgressInfo progress)
+        /// <param name="progressInfo"></param>
+        /// /// <param name="statusDescriptionMap">An optional status description mapper. Use it to override the default StatusDescription formatting.</param>
+        protected virtual void UpdateProgress(ProgressInfo progressInfo, Func<ProgressInfo, string> statusDescriptionMap = null)
         {
-            Map(progress, _progressRecord);
+            var statusDescriptionText = statusDescriptionMap?.Invoke(progressInfo);
+            Map(progressInfo, _progressRecord, statusDescriptionText);
             WriteProgress(_progressRecord);
         }
 
@@ -78,20 +82,11 @@ namespace AsyncProgressReporter
             }
         }
 
-        /// <summary>
-        /// Maps ProgressInfo properties to ProgressRecord properties. Override in a subclass to customize the mappings as desired.
-        /// </summary>
-        protected virtual Action<ProgressInfo, ProgressRecord> Map
+        private void Map(ProgressInfo info, ProgressRecord record, string customStatusDescription = null)
         {
-            get
-            {
-                return (info, record) =>
-                {
-                    record.CurrentOperation = info.CurrentOperation;
-                    record.StatusDescription = $"Completed {info.CompletedItems} of {info.TotalItems} items";
-                    record.PercentComplete = info.PercentComplete();
-                };
-            }
+            record.CurrentOperation = info.CurrentOperation;
+            record.PercentComplete = info.PercentComplete();
+            record.StatusDescription = string.IsNullOrWhiteSpace(customStatusDescription) ? $"Completed {info.CompletedItems} of {info.TotalItems} items" : customStatusDescription;
         }
     }
 }
