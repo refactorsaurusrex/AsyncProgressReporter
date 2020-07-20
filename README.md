@@ -24,25 +24,23 @@ Install-Package AsyncProgressReporter
 ```csharp
 // Implement your cmdlet by inheriting from AsyncProgressPSCmdlet,
 // which derives from PSCmdlet.
-[Cmdlet(VerbsLifecycle.Start, "LongRunningTask")]
-public class LongRunningTask : AsyncProgressPSCmdlet 
-{                                                    
+[Cmdlet(VerbsLifecycle.Start, "AsyncProgressBar")]
+public class AsyncProgressBar : AsyncProgressPSCmdlet
+{
     protected override void ProcessRecord()
     {
         // Create a new ProgressReporter.
-        var reporter = new ProgressReporter(); 
-        var fizzBuzz = new SlowFizzBuzz();   
+        var reporter = new ProgressReporter();
+        var fizzBuzz = new SlowFizzBuzz();
+
         // Start your long running function and pass in ProgressReporter instance.
         var task = fizzBuzz.Go(reporter);
 
         // Show progress bar and wait until task finishes.
         // Messages submitted to the ProgressReporter are
         // immediately displayed.
-        ShowBlockingProgress(reporter, "Searching for FizzBuzz..."); 
-        task.Wait();                                                 
-                                
-        // Dismiss progress bar.
-        HideBlockingProgress(); 
+        ShowProgressWait(reporter, "Searching for FizzBuzz...");
+        task.Wait();
     }
 }
 
@@ -50,37 +48,37 @@ public class SlowFizzBuzz
 {
     public async Task Go(IProgressReporter reporter)
     {
-        for (var i = 1; i <= 100; i++)
+        try
         {
-            if (i % 3 == 0 && i % 5 == 0)
+            for (var i = 1; i <= 100; i++)
             {
-                // Post progress update message.
-                await reporter.UpdateProgress("FIZZBUZZ!!", i, 100);
-                await Task.Delay(1000);
-            }
-            else if (i % 3 == 0)
-            {
-                // Post progress update message.
-                await reporter.UpdateProgress("FIZZ!", i, 100);
-                await Task.Delay(500);
-            }
-            else if (i % 5 == 0)
-            {
-                // Post progress update message.
-                await reporter.UpdateProgress("BUZZ!", i, 100);
-                await Task.Delay(500);
-            }
-            else
-            {
-                // Post progress update message.
-                await reporter.UpdateProgress($"{i} is boring.", i, 100);
-                await Task.Delay(50);
+                if (i % 3 == 0 && i % 5 == 0)
+                {
+                    await reporter.UpdateProgress("FIZZBUZZ!!", i, 100);
+                    await Task.Delay(1000);
+                }
+                else if (i % 3 == 0)
+                {
+                    await reporter.UpdateProgress("FIZZ!", i, 100);
+                    await Task.Delay(500);
+                }
+                else if (i % 5 == 0)
+                {
+                    await reporter.UpdateProgress("BUZZ!", i, 100);
+                    await Task.Delay(500);
+                }
+                else
+                {
+                    await reporter.UpdateProgress($"{i} is boring.", i, 100);
+                    await Task.Delay(50);
+                }
             }
         }
-
-        // Signal that the process has completed. CompleteAdding() MUST be called, or 
-        // ShowBlockingProgress() will never return.
-        reporter.CompleteAdding();
+        finally
+        {
+            // CompleteAdding() must be called or ShowBlockingProgress() will never return.
+            reporter.CompleteAdding();
+        }
     }
 }
 ```
