@@ -30,6 +30,8 @@ namespace AsyncProgressReporter
             else if (_progressRecord != null)
                 blockingProgressRecord.ParentActivityId = _progressRecord.ActivityId;
 
+            WriteProgress(blockingProgressRecord);
+
             foreach (var progressInfo in reporter.GetConsumingEnumerable())
             {
                 var statusDescriptionText = statusDescriptionMap?.Invoke(progressInfo);
