@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Management.Automation;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AsyncProgressReporter
 {
@@ -56,6 +59,23 @@ namespace AsyncProgressReporter
         {
             _progressRecord = new ProgressRecord(activityId, activity, initialDescription);
             WriteProgress(_progressRecord);
+        }
+
+        protected void ShowElapsedTimeProgress(IAsyncResult result, string activity, string description, int activityId = 1)
+        {
+            _progressRecord = new ProgressRecord(activityId, activity, description);
+            WriteProgress(_progressRecord);
+            var watch = Stopwatch.StartNew();
+
+            while (true)
+            {
+                if (result.IsCompleted)
+                    return;
+
+                Task.Delay(1000).Wait();
+                _progressRecord.CurrentOperation = $"Elapsed Time: {watch.Elapsed:mm\\:ss}";
+                WriteProgress(_progressRecord);
+            }
         }
 
         /// <summary>

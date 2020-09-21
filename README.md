@@ -19,7 +19,9 @@ Install-Package AsyncProgressReporter
 
 ## Example Usage
 
-> There are several fully-functional examples of how to use the various progress bar functions in [the demo project](https://github.com/refactorsaurusrex/AsyncProgressReporter/tree/master/src/AsyncProgressReporter.Demo). Instructions on how to build and run the project are below.
+> There are several more fully-functional examples of how to use the various progress bar functions in [the demo project](https://github.com/refactorsaurusrex/AsyncProgressReporter/tree/master/src/AsyncProgressReporter.Demo). Instructions on how to build and run the project are below.
+
+### Basic Async Progress Bar
 
 ```csharp
 // Implement your cmdlet by inheriting from AsyncProgressPSCmdlet,
@@ -31,9 +33,9 @@ public class AsyncProgressBar : AsyncProgressPSCmdlet
     {
         // Create a new ProgressReporter.
         var reporter = new ProgressReporter();
-        var fizzBuzz = new SlowFizzBuzz();
-
+        
         // Start your long running function and pass in ProgressReporter instance.
+        var fizzBuzz = new SlowFizzBuzz();
         var task = fizzBuzz.Go(reporter);
 
         // Show progress bar and wait until task finishes.
@@ -82,6 +84,36 @@ public class SlowFizzBuzz
     }
 }
 ```
+
+### Elapsed Time Progress Bar
+
+```powershell
+[Cmdlet(VerbsLifecycle.Start, "ElapsedTimeProgressBar")]
+public class ElapsedTimeProgressBar : AsyncProgressPSCmdlet
+{
+    [Parameter]
+    [ValidateRange(1, int.MaxValue)]
+    public int Seconds { get; set; } = 5;
+
+    protected override void ProcessRecord()
+    {
+        // Start a long running task...
+        var task = Task.Run(() =>
+        {
+            Task.Delay(Seconds * 1000).Wait();
+            return $"The task completed after {Seconds} seconds";
+        });
+        
+        // Show a progress bar that displays the task's elapsed running time.
+        // Method blocks until task is finished.
+        ShowElapsedTimeProgress(task, "Long Running Task", "Please wait, this will only take a few seconds...");
+        WriteObject(task.Result);
+        HideProgress();
+    }
+}
+```
+
+
 
 ## Running and Debugging
 
